@@ -1,0 +1,495 @@
+<html>
+    <head>
+        <title>
+            User Manual
+        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1 id="sbjs-user-manual">sbJS User Manual</h1>
+        <p>&copy; 2026 ionvop</p>
+        <hr>
+        <h2 id="1-overview">1. Overview</h2>
+        <p><strong>sbJS</strong> is a browser‑based tool for creating sprite‑based animations synchronized to music, using JavaScript code.</p>
+        <p>You:</p>
+        <ul>
+        <li>Upload a <strong>music track</strong>.</li>
+        <li>Upload one or more <strong>sprite images</strong>.</li>
+        <li>Write a <strong>script</strong> that animates those sprites over time.</li>
+        <li>Preview the animation in real time.</li>
+        <li>Export:<ul>
+        <li><strong>Project files</strong> (<code>.dat</code>) you can reopen later.</li>
+        <li><strong>Video data</strong> (<code>.dat</code>) containing one image per frame plus audio, to be processed by an external encoder.</li>
+        </ul>
+        </li>
+        </ul>
+        <p>This document explains how to use the UI and how to write scripts for animations.</p>
+        <hr>
+        <h2 id="2-getting-started">2. Getting Started</h2>
+        <h3 id="2-1-requirements">2.1 Requirements</h3>
+        <ul>
+        <li>A modern desktop browser (Chrome, Firefox, Edge, etc.).</li>
+        <li>No server needed: all files are processed locally in your browser.</li>
+        <li>Enough memory/disk space for:<ul>
+        <li>Audio file(s).</li>
+        <li>Sprite images.</li>
+        <li>Potentially large rendered video data files (many PNG frames).</li>
+        </ul>
+        </li>
+        </ul>
+        <h3 id="2-2-launching-sbjs">2.2 Launching sbJS</h3>
+        <ol>
+        <li>Place all files (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>, <code>sandbox.js</code>, <code>classes.js</code>, <code>prism.js</code>, <code>prism.css</code>) in the same folder.</li>
+        <li>Open <code>index.html</code> in your browser (e.g., drag it into a tab, or double‑click it).</li>
+        </ol>
+        <p>You should see:</p>
+        <ul>
+        <li>A top bar with <strong>sbJS</strong> and buttons: <code>New</code>, <code>Open</code>, <code>Save</code>, <code>Render</code>.</li>
+        <li>A 3‑column layout:<ul>
+        <li><strong>Left:</strong> Code editor and status console.</li>
+        <li><strong>Middle:</strong> Vertical splitter bar.</li>
+        <li><strong>Right:</strong> Preview canvas, audio player, sprite list.</li>
+        </ul>
+        </li>
+        </ul>
+        <hr>
+        <h2 id="3-interface-overview">3. Interface Overview</h2>
+        <h3 id="3-1-top-bar">3.1 Top Bar</h3>
+        <p>From left to right:</p>
+        <ul>
+        <li><strong>sbJS</strong> – app name.</li>
+        <li><strong>New</strong> – starts a new empty project (asks for confirmation).</li>
+        <li><strong>Open</strong> – loads a previously saved <code>.dat</code> project file.</li>
+        <li><strong>Save</strong> – saves the current project as a <code>.dat</code> file.</li>
+        <li><strong>Render</strong> – renders the current scene into a video data <code>.dat</code> file (image frames + audio).</li>
+        </ul>
+        <h3 id="3-2-main-layout">3.2 Main Layout</h3>
+        <p>The main area is divided into two columns:</p>
+        <ol>
+        <li><p><strong>Left Column (Code &amp; Status)</strong><br>This column is further split horizontally:</p>
+        <ul>
+        <li><strong>Code Editor (top)</strong>  <ul>
+        <li>A monospace JavaScript editor with syntax highlighting.</li>
+        <li>Your script is entered here.</li>
+        </ul>
+        </li>
+        <li><strong>Horizontal Splitter</strong> (drag to resize vertical ratio).</li>
+        <li><strong>Status Panel (bottom)</strong>  <ul>
+        <li>Displays output from <code>print()</code> calls in your script.</li>
+        <li>Shows errors in red when your script fails to run.</li>
+        </ul>
+        </li>
+        </ul>
+        </li>
+        <li><p><strong>Right Column (Preview, Audio, Sprites)</strong><br>This column is also split horizontally:</p>
+        <ul>
+        <li><strong>Preview Area (top)</strong>  <ul>
+        <li><strong>Canvas Preview</strong> – shows the current frame of your animation.</li>
+        <li><strong>Audio Player</strong> – native <code>&lt;audio&gt;</code> element for playing/pausing/seeking the music.</li>
+        </ul>
+        </li>
+        <li><strong>Horizontal Splitter</strong> (between preview and sprites).</li>
+        <li><strong>Sprites Panel (bottom)</strong>  <ul>
+        <li>Left side: two buttons:<ul>
+        <li><strong>Music icon</strong> – upload/replace music.</li>
+        <li><strong>Image icon</strong> – upload new sprite.</li>
+        </ul>
+        </li>
+        <li>Right side: list of sprites (thumbnail, name field, delete button).</li>
+        </ul>
+        </li>
+        </ul>
+        </li>
+        </ol>
+        <h3 id="3-3-splitters-resizing">3.3 Splitters / Resizing</h3>
+        <p>The app uses draggable gutters:</p>
+        <ul>
+        <li><strong>Vertical splitter</strong> (center): resize code side vs. preview/sprites side.</li>
+        <li><strong>Horizontal splitters</strong>:<ul>
+        <li>Between code editor and status panel.</li>
+        <li>Between preview area and sprites panel.</li>
+        </ul>
+        </li>
+        </ul>
+        <p>You can drag these to adjust the layout. The preview canvas auto‑resizes to maintain a 16:9 aspect ratio within its pane.</p>
+        <hr>
+        <h2 id="4-working-with-music">4. Working with Music</h2>
+        <h3 id="4-1-import-music">4.1 Import Music</h3>
+        <ol>
+        <li>In the sprites panel (bottom‑right), click the <strong>music icon</strong> (tooltip: “Upload music”).</li>
+        <li>Select an audio file (<code>audio/*</code> – e.g., <code>.mp3</code>, <code>.ogg</code>, <code>.wav</code>).</li>
+        <li>The audio is loaded and shown in the audio player.</li>
+        </ol>
+        <p>The current music is used for:</p>
+        <ul>
+        <li><strong>Playback preview</strong> (you control via the audio player).</li>
+        <li><strong>Render</strong> (length and content of exported video data).</li>
+        </ul>
+        <p>If a track is already loaded, you will be asked to confirm replacement.</p>
+        <h3 id="4-2-playback-controls">4.2 Playback Controls</h3>
+        <p>Use the standard audio controls:</p>
+        <ul>
+        <li><strong>Play / Pause</strong></li>
+        <li><strong>Seek bar</strong> – change current time.</li>
+        <li><strong>Volume</strong> and <strong>mute</strong> (browser‑dependent UI).</li>
+        </ul>
+        <p>When playing:</p>
+        <ul>
+        <li>The preview updates continuously, synchronized to the current audio time.</li>
+        <li>When you seek, the preview updates to reflect the new time.</li>
+        </ul>
+        <hr>
+        <h2 id="5-working-with-sprites">5. Working with Sprites</h2>
+        <h3 id="5-1-adding-a-sprite">5.1 Adding a Sprite</h3>
+        <ol>
+        <li>In the sprites panel, click the <strong>image icon</strong> (tooltip: “Upload new sprite”).</li>
+        <li>Choose an image file (<code>image/*</code> – e.g., <code>.png</code>, <code>.jpg</code>).</li>
+        <li>The sprite appears in the list with:<ul>
+        <li>Thumbnail preview.</li>
+        <li>Name input field.</li>
+        <li>Delete icon.</li>
+        </ul>
+        </li>
+        </ol>
+        <p>sbJS assigns an initial unique name:</p>
+        <ul>
+        <li><code>&quot;New sprite&quot;</code>, <code>&quot;New sprite (2)&quot;</code>, <code>&quot;New sprite (3)&quot;</code>, etc.</li>
+        </ul>
+        <h3 id="5-2-sprite-names-and-scripting">5.2 Sprite Names and Scripting</h3>
+        <p>Sprite names are important:</p>
+        <ul>
+        <li>In your script you create sprites by passing a <strong>string name</strong> to the <code>Sprite</code> constructor.</li>
+        <li>That name must <strong>exactly match</strong> the name of one of the uploaded sprites (case‑sensitive) for it to render.</li>
+        </ul>
+        <p>Example: if your sprite list shows a sprite named <code>logo</code>, in your script:</p>
+        <pre><code class="lang-js"><span class="hljs-keyword">const</span> logo = <span class="hljs-keyword">new</span> Sprite(<span class="hljs-string">"logo"</span>);
+        </code></pre>
+        <p>If you typo the name (e.g. <code>&quot;Logo&quot;</code>), the sprite won’t appear in the preview.</p>
+        <h3 id="5-3-renaming-sprites">5.3 Renaming Sprites</h3>
+        <ul>
+        <li>Edit the <strong>name input</strong> in the sprite list.</li>
+        <li>The new name is immediately applied.</li>
+        <li>Update your script to use the new name if needed.</li>
+        </ul>
+        <h3 id="5-4-deleting-sprites">5.4 Deleting Sprites</h3>
+        <ul>
+        <li>Click the <strong>trash icon</strong> on the row of the sprite you want to remove.</li>
+        <li>Confirm in the dialog.</li>
+        <li>The sprite is removed from the project.</li>
+        </ul>
+        <p>Any <code>Sprite(&quot;thatName&quot;)</code> in your script will then refer to a name that no longer exists visually. The code will still run, but nothing will be drawn for that sprite.</p>
+        <hr>
+        <h2 id="6-writing-scripts">6. Writing Scripts</h2>
+        <p>Scripts are written in plain JavaScript in the left editor.<br>Every time you modify the code:</p>
+        <ul>
+        <li>It is sent to a <strong>sandboxed worker</strong> for evaluation.</li>
+        <li>If it runs successfully, the scene is updated and the preview redraws.</li>
+        <li>If it throws an error, the error message is shown in red in the status panel.</li>
+        </ul>
+        <h3 id="6-1-script-environment">6.1 Script Environment</h3>
+        <p>Your script is executed as:</p>
+        <pre><code class="lang-js"><span class="hljs-keyword">new</span> <span class="hljs-function"><span class="hljs-keyword">Function</span><span class="hljs-params">(<span class="hljs-string">"Sprite"</span>, <span class="hljs-string">"print"</span>, code)</span></span>;
+        </code></pre>
+        <p>So:</p>
+        <ul>
+        <li>You are provided with:<ul>
+        <li><code>Sprite</code> – the class you use to define animated sprites.</li>
+        <li><code>print</code> – a function to log messages to the status panel.</li>
+        </ul>
+        </li>
+        <li>You can use normal JavaScript features:<ul>
+        <li>Variables, functions, loops, etc.</li>
+        </ul>
+        </li>
+        <li>You <strong>do not</strong> interact with the DOM here; this code runs in a Web Worker.</li>
+        </ul>
+        <h3 id="6-2-the-sprite-class">6.2 The <code>Sprite</code> Class</h3>
+        <p><code>Sprite</code> defines an animated object in your scene.</p>
+        <pre><code class="lang-js"><span class="hljs-keyword">const</span> mySprite = <span class="hljs-keyword">new</span> Sprite(<span class="hljs-string">"spriteName"</span>);
+        </code></pre>
+        <ul>
+        <li><strong><code>spriteName</code></strong>: String, must match a sprite’s name in the sprite list.</li>
+        </ul>
+        <p>Once created, you define <strong>animation events</strong> using methods:</p>
+        <h4 id="6-2-1-generic-move-">6.2.1 Generic <code>move</code></h4>
+        <pre><code class="lang-js">mySprite.move(<span class="hljs-built_in">type</span>, startTime, targetValue, <span class="hljs-built_in">duration</span> = <span class="hljs-number">0</span>, easing = <span class="hljs-string">"linear"</span>);
+        </code></pre>
+        <ul>
+        <li><code>type</code> – which property to animate:<ul>
+        <li><code>&quot;x&quot;</code> – horizontal position (0.0 = left, 1.0 = right).</li>
+        <li><code>&quot;y&quot;</code> – vertical position (0.0 = top, 1.0 = bottom).</li>
+        <li><code>&quot;size&quot;</code> – scale multiplier (1.0 = original size).</li>
+        <li><code>&quot;angle&quot;</code> – rotation in <strong>radians</strong>.</li>
+        <li><code>&quot;alpha&quot;</code> – opacity (0.0 = invisible, 1.0 = fully opaque).</li>
+        </ul>
+        </li>
+        <li><code>startTime</code> – when the animation starts, in <strong>seconds</strong> (same as audio time).</li>
+        <li><code>targetValue</code> – value at the end of this event.</li>
+        <li><code>duration</code> – how long the event lasts, in seconds:<ul>
+        <li><code>0</code> = instant jump at <code>startTime</code>.</li>
+        <li><code>&gt; 0</code> = interpolation from current value to <code>targetValue</code> over time.</li>
+        </ul>
+        </li>
+        <li><code>easing</code> – one of:<ul>
+        <li><code>&quot;linear&quot;</code> (default; straight interpolation),</li>
+        <li><code>&quot;easeIn&quot;</code>,</li>
+        <li><code>&quot;easeOut&quot;</code>,</li>
+        <li><code>&quot;easeInOut&quot;</code>.</li>
+        </ul>
+        </li>
+        </ul>
+        <h4 id="6-2-2-convenience-methods">6.2.2 Convenience Methods</h4>
+        <p>For convenience, you can call:</p>
+        <pre><code class="lang-js">mySprite.moveX(startTime, targetValue, <span class="hljs-attr">duration</span> = <span class="hljs-number">0</span>, <span class="hljs-attr">easing</span> = <span class="hljs-string">"linear"</span>);
+        mySprite.moveY(startTime, targetValue, <span class="hljs-attr">duration</span> = <span class="hljs-number">0</span>, <span class="hljs-attr">easing</span> = <span class="hljs-string">"linear"</span>);
+        mySprite.scale(startTime, targetValue, <span class="hljs-attr">duration</span> = <span class="hljs-number">0</span>, <span class="hljs-attr">easing</span> = <span class="hljs-string">"linear"</span>);
+        mySprite.rotate(startTime, targetValue, <span class="hljs-attr">duration</span> = <span class="hljs-number">0</span>, <span class="hljs-attr">easing</span> = <span class="hljs-string">"linear"</span>);
+        mySprite.alpha(startTime, targetValue, <span class="hljs-attr">duration</span> = <span class="hljs-number">0</span>, <span class="hljs-attr">easing</span> = <span class="hljs-string">"linear"</span>);
+        </code></pre>
+        <p>These are equivalent to <code>move(&quot;x&quot;, ...)</code>, <code>move(&quot;y&quot;, ...)</code>, etc.</p>
+        <h4 id="6-2-3-initial-values">6.2.3 Initial Values</h4>
+        <p>If you don&#39;t set any events, default sprite properties are:</p>
+        <ul>
+        <li><code>x</code>: <code>0.5</code> (center horizontally)</li>
+        <li><code>y</code>: <code>0.5</code> (center vertically)</li>
+        <li><code>size</code>: <code>1</code> (original image size)</li>
+        <li><code>angle</code>: <code>0</code> (no rotation)</li>
+        <li><code>alpha</code>: <code>1</code> (fully visible)</li>
+        </ul>
+        <h3 id="6-3-coordinate-system-and-units">6.3 Coordinate System and Units</h3>
+        <ul>
+        <li><strong>Time</strong> – seconds; synced with <code>audMusic.currentTime</code>.</li>
+        <li><strong>Positions</strong> – normalized:<ul>
+        <li><code>x = 0</code> → left edge of screen.</li>
+        <li><code>x = 1</code> → right edge.</li>
+        <li><code>y = 0</code> → top.</li>
+        <li><code>y = 1</code> → bottom.</li>
+        </ul>
+        </li>
+        <li><strong>Size (<code>size</code>)</strong> – multiplies image’s intrinsic dimensions.</li>
+        <li><strong>Angle (<code>angle</code>)</strong> – radians (e.g., <code>Math.PI</code> ≈ 180°, <code>Math.PI / 2</code> ≈ 90°).</li>
+        <li><strong>Alpha (<code>alpha</code>)</strong> – opacity from 0 to 1.</li>
+        </ul>
+        <h3 id="6-4-debugging-with-print-">6.4 Debugging with <code>print</code></h3>
+        <p>Use <code>print()</code> to display messages in the <strong>status panel</strong> (bottom left):</p>
+        <pre><code class="lang-js"><span class="hljs-built_in">print</span>(<span class="hljs-string">"Script loaded"</span>);
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">"Sprite x start time is "</span> + startTime);
+        </code></pre>
+        <ul>
+        <li>Each call prints a line.</li>
+        <li>On success, messages appear in light gray.</li>
+        <li>On error, the error message replaces the status content and appears in red.</li>
+        </ul>
+        <h3 id="6-5-example-scripts">6.5 Example Scripts</h3>
+        <h4 id="6-5-1-basic-example">6.5.1 Basic Example</h4>
+        <pre><code class="lang-js">print(<span class="hljs-string">"Hello, sbJS!"</span>);
+
+        <span class="hljs-comment">// Make sure a sprite named "logo" exists in the sprite list.</span>
+        const logo = new Sprite(<span class="hljs-string">"logo"</span>);
+
+        <span class="hljs-comment">// Move logo from left to right between 0s and 5s</span>
+        logo.moveX(<span class="hljs-number">0</span>, <span class="hljs-number">0.0</span>);             <span class="hljs-comment">// instantly at time 0, x = 0 (left)</span>
+        logo.moveX(<span class="hljs-number">0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">5</span>, <span class="hljs-string">"easeInOut"</span>); <span class="hljs-comment">// from t=0 to t=5, move to x=1 (right)</span>
+
+        <span class="hljs-comment">// Fade in from 0s to 2s</span>
+        logo.alpha(<span class="hljs-number">0</span>, <span class="hljs-number">0.0</span>);           <span class="hljs-comment">// start fully transparent</span>
+        logo.alpha(<span class="hljs-number">0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">2</span>, <span class="hljs-string">"easeOut"</span>);
+
+        <span class="hljs-comment">// Slight scale up at 3s (instant)</span>
+        logo.scale(<span class="hljs-number">3</span>, <span class="hljs-number">1.2</span>);
+
+        <span class="hljs-comment">// Rotate from 4s to 8s</span>
+        logo.rotate(<span class="hljs-number">4</span>, <span class="hljs-number">0</span>);               <span class="hljs-comment">// start at angle 0</span>
+        logo.rotate(<span class="hljs-number">4</span>, Math.<span class="hljs-literal">PI</span> * <span class="hljs-number">2</span>, <span class="hljs-number">4</span>);  <span class="hljs-comment">// spin 360° over 4 seconds</span>
+        </code></pre>
+        <h4 id="6-5-2-multiple-sprites">6.5.2 Multiple Sprites</h4>
+        <pre><code class="lang-js">const bg = new Sprite(<span class="hljs-string">"Background"</span>);
+        const text = new Sprite(<span class="hljs-string">"Text"</span>);
+
+        <span class="hljs-comment">// Background: always visible, slowly zooming in</span>
+        bg.scale(<span class="hljs-number">0</span>, <span class="hljs-number">1.0</span>);
+        bg.scale(<span class="hljs-number">0</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">30</span>, <span class="hljs-string">"easeInOut"</span>);
+
+        <span class="hljs-comment">// Text: fade in at 5s, drift up</span>
+        text.alpha(<span class="hljs-number">5</span>, <span class="hljs-number">0</span>);
+        text.alpha(<span class="hljs-number">5</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-string">"easeIn"</span>);
+
+        text.moveY(<span class="hljs-number">5</span>, <span class="hljs-number">0.7</span>);
+        text.moveY(<span class="hljs-number">5</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">10</span>, <span class="hljs-string">"easeOut"</span>);
+
+        print(<span class="hljs-string">"Scene setup complete."</span>);
+        </code></pre>
+        <p>Make sure you have sprites named <code>Background</code> and <code>Text</code> for this example.</p>
+        <hr>
+        <h2 id="7-previewing-the-animation">7. Previewing the Animation</h2>
+        <h3 id="7-1-automatic-updates">7.1 Automatic Updates</h3>
+        <ul>
+        <li>Every time you change the script:<ul>
+        <li>The scene is recalculated.</li>
+        <li>The preview is updated (for the current audio time).</li>
+        </ul>
+        </li>
+        <li>When music is playing:<ul>
+        <li>The preview continuously re‑renders to match the audio position.</li>
+        </ul>
+        </li>
+        </ul>
+        <h3 id="7-2-seeking">7.2 Seeking</h3>
+        <ul>
+        <li>Drag the audio player’s seek bar.</li>
+        <li>The canvas updates to show the frame at that new time.</li>
+        </ul>
+        <h3 id="7-3-error-handling">7.3 Error Handling</h3>
+        <p>If your script throws an exception:</p>
+        <ul>
+        <li>Preview continues to show the last successful scene.</li>
+        <li>Status panel shows the error message in red.</li>
+        <li>Fix your code; on the next successful run, the scene is updated.</li>
+        </ul>
+        <hr>
+        <h2 id="8-project-files-new-open-save">8. Project Files: New, Open, Save</h2>
+        <h3 id="8-1-new-project">8.1 New Project</h3>
+        <p><strong>Button:</strong> <code>New</code></p>
+        <ul>
+        <li>Asks: <em>“New project? All unsaved changes will be lost”</em>.</li>
+        <li><p>If confirmed:</p>
+        <ul>
+        <li>Clears music.</li>
+        <li>Clears sprites.</li>
+        <li>Creates a fresh scene.</li>
+        <li><p>Resets the editor to:</p>
+        <pre><code class="lang-js">print(<span class="hljs-string">"Hello, world!"</span>)<span class="hljs-comment">;</span>
+        </code></pre>
+        </li>
+        </ul>
+        </li>
+        </ul>
+        <p>Use this when starting from scratch.</p>
+        <h3 id="8-2-save-project">8.2 Save Project</h3>
+        <p><strong>Button:</strong> <code>Save</code></p>
+        <ul>
+        <li><p>Packages the current state into a JSON object:</p>
+        <pre><code class="lang-jsonc">{
+        <span class="hljs-attr">"music"</span>: <span class="hljs-string">"&lt;data URL of audio&gt;"</span>,
+        <span class="hljs-attr">"sprites"</span>: [
+            { <span class="hljs-attr">"name"</span>: <span class="hljs-string">"SpriteName"</span>, <span class="hljs-attr">"data"</span>: <span class="hljs-string">"&lt;data URL of image&gt;"</span> },
+            ...
+        ],
+        <span class="hljs-attr">"code"</span>: <span class="hljs-string">"/* your script as a string */"</span>
+        }
+        </code></pre>
+        </li>
+        <li><p>Encodes it with Base64.</p>
+        </li>
+        <li><p>Downloads a file named like:</p>
+        <pre><code>sbJS_Project_YYYY-MM-DDTHH:MM:SS<span class="hljs-selector-class">.sssZ</span><span class="hljs-selector-class">.dat</span>
+        </code></pre></li>
+        </ul>
+        <p><strong>Use this for:</strong></p>
+        <ul>
+        <li>Backing up your work.</li>
+        <li>Sharing projects with others who also have sbJS.</li>
+        </ul>
+        <h3 id="8-3-open-project">8.3 Open Project</h3>
+        <p><strong>Button:</strong> <code>Open</code></p>
+        <ul>
+        <li>Asks: <em>“Open project? All unsaved changes will be lost”</em>.</li>
+        <li>If confirmed:<ol>
+        <li>Prompts you to choose a <code>.dat</code> file created by sbJS <code>Save</code>.</li>
+        <li>Reads and decodes its contents.</li>
+        <li>Restores:<ul>
+        <li><code>music</code>,</li>
+        <li><code>sprites</code>,</li>
+        <li><code>code</code> (editor content).</li>
+        </ul>
+        </li>
+        <li>Re‑evaluates the restored script and updates the scene.</li>
+        </ol>
+        </li>
+        </ul>
+        <p>If the file is not a valid sbJS project, behavior is undefined (likely an error in the status panel).</p>
+        <hr>
+        <h2 id="9-rendering-video-data">9. Rendering Video Data</h2>
+        <p><strong>Button:</strong> <code>Render</code></p>
+        <p>Rendering exports all frames of your animation as PNGs plus the audio, wrapped in a single <code>.dat</code> file. This is meant to be post‑processed by a separate encoder (not included in this project).</p>
+        <h3 id="9-1-process">9.1 Process</h3>
+        <ol>
+        <li>Button state changes to:<ul>
+        <li>Text: <code>Rendering...</code></li>
+        <li>Disabled (no clicks).</li>
+        </ul>
+        </li>
+        <li><p>The app computes the number of frames:</p>
+        <pre><code class="lang-js"><span class="hljs-attribute">frameCount</span> = Math.floor(audMusic.duration * <span class="hljs-number">60</span>)<span class="hljs-comment">;</span>
+        </code></pre>
+        <p>→ ~60 FPS for the entire duration of the audio.</p>
+        </li>
+        <li><p>For each frame <code>i</code> from <code>0</code> to <code>frameCount - 1</code>:</p>
+        <ul>
+        <li>Set <code>audMusic.currentTime = i / 60</code>.</li>
+        <li>Render the frame.</li>
+        <li>Convert the internal buffer canvas to a PNG data URL.</li>
+        <li>Append it to <code>video.frames</code>.</li>
+        <li>Update button text: <code>Rendering... i/frameCount</code>.</li>
+        </ul>
+        </li>
+        <li><p>At the end:</p>
+        <ul>
+        <li><p>Prepare object:</p>
+        <pre><code class="lang-jsonc">{
+        <span class="hljs-attr">"frames"</span>: [<span class="hljs-string">"data:image/png;base64,..."</span>, ...],
+        <span class="hljs-attr">"audio"</span>: <span class="hljs-string">"&lt;data URL of audio&gt;"</span>
+        }
+        </code></pre>
+        </li>
+        <li><p>Base64‑encode it.</p>
+        </li>
+        <li><p>Download as:</p>
+        <pre><code>sbJS_Video_YYYY-MM-DDTHH:MM:SS<span class="hljs-selector-class">.sssZ</span><span class="hljs-selector-class">.dat</span>
+        </code></pre></li>
+        <li><p>Restore button state to <code>Render</code> and re‑enable it.</p>
+        </li>
+        </ul>
+        </li>
+        </ol>
+        <h3 id="9-2-notes-and-caveats">9.2 Notes and Caveats</h3>
+        <ul>
+        <li>Rendering can produce <strong>very large files</strong>:<ul>
+        <li>Duration (seconds) × 60 frames × PNG size.</li>
+        </ul>
+        </li>
+        <li>Rendering happens in the browser; expect it to take time for longer tracks.</li>
+        <li>The <code>.dat</code> video file is <strong>not</strong> directly playable; you must write or use an external tool to:<ul>
+        <li>Decode Base64.</li>
+        <li>Parse JSON.</li>
+        <li>Combine the PNG frames and audio into a proper video file (e.g., via ffmpeg).</li>
+        </ul>
+        </li>
+        </ul>
+        <hr>
+        <h2 id="10-tips-limitations">10. Tips &amp; Limitations</h2>
+        <ul>
+        <li><strong>Sprite name management</strong><ul>
+        <li>Always ensure your script’s <code>Sprite(&quot;name&quot;)</code> strings match the names in the sprite panel.</li>
+        </ul>
+        </li>
+        <li><strong>Event ordering</strong><ul>
+        <li>Internally, events are sorted by <code>startTime</code>.</li>
+        <li>Multiple events can target the same property at different times; later ones override earlier ones after their durations.</li>
+        </ul>
+        </li>
+        <li><strong>Performance</strong><ul>
+        <li>Many high‑resolution sprites and complex scripts may slow down preview and especially rendering.</li>
+        </ul>
+        </li>
+        <li><strong>Browser limitations</strong><ul>
+        <li>Everything runs client‑side; max project size is constrained by browser memory and performance.</li>
+        </ul>
+        </li>
+        <li><strong>No undo</strong><ul>
+        <li>There is no undo stack; use <code>Save</code> frequently to keep versions.</li>
+        </ul>
+        </li>
+        </ul>
+    </body>
+</html>
