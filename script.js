@@ -11,6 +11,7 @@ const panelContainer = document.getElementById("panelContainer");
 const canvasRender = document.getElementById("canvasRender");
 const audMusic = document.getElementById("audMusic");
 const splitRow = document.getElementById("splitRow");
+const panelDetails = document.getElementById("panelDetails");
 const btnMusic = document.getElementById("btnMusic");
 const btnNewSprite = document.getElementById("btnNewSprite");
 const panelSprites = document.getElementById("panelSprites");
@@ -150,6 +151,12 @@ function getImage(dataUrl) {
 }
 
 function renderFrame() {
+    const frameCount = Math.floor(audMusic.duration * 60) || 0;
+    const frame = Math.floor(audMusic.currentTime * 60) || 0;
+    const ms = Math.floor(audMusic.currentTime * 1000) || 0;
+
+    panelDetails.textContent = `${frame}/${frameCount}\n(${ms}ms)`;
+
     const render = data.scene.draw(audMusic.currentTime);
     bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
 
@@ -162,7 +169,10 @@ function renderFrame() {
             y: sprite.properties.y,
             size: sprite.properties.size,
             angle: sprite.properties.angle,
-            alpha: sprite.properties.alpha
+            alpha: sprite.properties.alpha,
+            additive: sprite.properties.additive,
+            sizeH: sprite.properties.sizeH,
+            sizeV: sprite.properties.sizeV
         }
         
         renderSprite(bufferCtx, buffer, item);
@@ -176,13 +186,14 @@ function renderSprite(ctx, canvas, item) {
     const img = item.img;
     const cx = item.x * canvas.width;
     const cy = item.y * canvas.height;
-    const w = img.width * item.size;
-    const h = img.height * item.size;
+    const w = img.width * item.size * Math.abs(item.sizeH);
+    const h = img.height * item.size * Math.abs(item.sizeV);
     ctx.save();
     ctx.globalAlpha = item.alpha;
     if (item.additive == 1) ctx.globalCompositeOperation = "lighter";
     ctx.translate(cx, cy);
     ctx.rotate(item.angle);
+    ctx.scale(item.sizeH < 0 ? -1 : 1, item.sizeV < 0 ? -1 : 1);
     ctx.drawImage(img, -w/2, -h/2, w, h);
     ctx.restore();
 }
