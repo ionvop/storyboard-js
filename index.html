@@ -160,24 +160,63 @@
                         overflow: hidden;">
                         <div style="
                             display: grid;
-                            grid-template-rows: repeat(2, max-content) 1fr;
+                            grid-template-rows: repeat(3, max-content) 1fr;
                             border-right: 1px solid #555;
                             overflow: hidden;">
                             <div style="
                                 padding: 1rem;
                                 border-bottom: 1px solid #555;
-                                cursor: pointer;"
-                                title="Upload music"
-                                id="btnMusic">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M127-167q-47-47-47-113t47-113q47-47 113-47 23 0 42.5 5.5T320-418v-308q0-15 9.5-26.5T353-766l400-66q18-3 32.5 8.5T800-793v433q0 66-47 113t-113 47q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T720-498v-165l-320 63v320q0 66-47 113t-113 47q-66 0-113-47Z"/></svg>
+                                font-size: 0.7rem;
+                                color: #aaa;
+                                text-align: center;"
+                                id="panelDetails">
+
                             </div>
                             <div style="
-                                padding: 1rem;
+                                display: grid;
+                                grid-template-columns: max-content 1fr;
                                 border-bottom: 1px solid #555;
-                                cursor: pointer;"
-                                title="Upload new sprite"
+                                cursor: pointer;
+                                overflow: hidden;"
+                                id="btnMusic">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M127-167q-47-47-47-113t47-113q47-47 113-47 23 0 42.5 5.5T320-418v-308q0-15 9.5-26.5T353-766l400-66q18-3 32.5 8.5T800-793v433q0 66-47 113t-113 47q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T720-498v-165l-320 63v320q0 66-47 113t-113 47q-66 0-113-47Z"/></svg>
+                                </div>
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;
+                                    padding-left: 0rem;
+                                    font-size: 0.7rem;
+                                    color: #aaa;">
+                                    Set track
+                                </div>
+                            </div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: max-content 1fr;
+                                border-bottom: 1px solid #555;
+                                cursor: pointer;
+                                overflow: hidden;"
                                 id="btnNewSprite">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm80-160h400q12 0 18-11t-2-21L586-459q-6-8-16-8t-16 8L450-320l-74-99q-6-8-16-8t-16 8l-80 107q-8 10-2 21t18 11Z"/></svg>
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm80-160h400q12 0 18-11t-2-21L586-459q-6-8-16-8t-16 8L450-320l-74-99q-6-8-16-8t-16 8l-80 107q-8 10-2 21t18 11Z"/></svg>
+                                </div>
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;
+                                    padding-left: 0rem;
+                                    font-size: 0.7rem;
+                                    color: #aaa;">
+                                    Upload new sprite
+                                </div>
                             </div>
                             <div></div>
                         </div>
