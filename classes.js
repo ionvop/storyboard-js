@@ -3,19 +3,20 @@ class Scene {
         this.sprites = [];
     }
 
-    add(sprite) {
-        this.sprites.push(sprite);
-    }
-
     _lerp(a, b, t) {
         return a + (b - a) * t;
     }
 
     _ease(t, type) {
         switch (type) {
-            case "easeIn": return t * t;
-            case "easeOut": return 1 - (1 - t) * (1 - t);
+            case "easeIn":
+            case "i":
+                return t * t;
+            case "easeOut":
+            case "o":
+                return 1 - (1 - t) * (1 - t);
             case "easeInOut":
+            case "io":
                 return t < 0.5
                     ? 2 * t * t
                     : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -33,8 +34,14 @@ class Scene {
                 size: 1,
                 angle: 0,
                 alpha: 1,
-                additive: 0
+                additive: 0,
+                sizeH: 1,
+                sizeV: 1
             };
+
+            for (const key in sprite.initialProperties) {
+                properties[key] = sprite.initialProperties[key];
+            }
 
             const sortedEvents = sprite.events.toSorted((a, b) => a.startTime - b.startTime);
 
