@@ -4,7 +4,7 @@ interface TopBarProps {
   onNew: () => void
   onOpen: () => void
   onSave: () => void
-  onRender: () => void
+  onOpenExport: () => void
   onHelp: () => void
   rendering: boolean
   renderProgress?: string | null
@@ -18,7 +18,7 @@ export function TopBar({
   onNew,
   onOpen,
   onSave,
-  onRender,
+  onOpenExport,
   onHelp,
   rendering,
   renderProgress,
@@ -54,7 +54,7 @@ export function TopBar({
           WebM {webmSupported ? '' : '(unavailable)'}
         </option>
       </select>
-      <button className="btn btn-ghost btn-sm" onClick={onRender} disabled={rendering}>
+      <button className="btn btn-ghost btn-sm" onClick={onOpenExport} disabled={rendering}>
         {rendering ? renderProgress ?? 'Rendering…' : 'Render'}
       </button>
       <button className="btn btn-ghost btn-sm" onClick={onHelp}>
