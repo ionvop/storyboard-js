@@ -2,7 +2,7 @@ import type { SpriteProperties } from './types'
 
 const imageCache = new Map<string, HTMLImageElement>()
 
-function getImage(dataUrl: string): HTMLImageElement {
+export function getImage(dataUrl: string): HTMLImageElement {
   let img = imageCache.get(dataUrl)
   if (!img) {
     img = new Image()
