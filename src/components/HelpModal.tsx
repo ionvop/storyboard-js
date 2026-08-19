@@ -44,8 +44,7 @@ export function HelpModal({ open, onClose }: HelpModalProps) {
               <li>Write a <strong>script</strong> that animates those sprites over time.</li>
               <li>Preview the animation in real time.</li>
               <li>
-                Export <strong>project files</strong> (<code>.dat</code>) you can reopen later, or{' '}
-                <strong>video data</strong> (<code>.dat</code>) for an external encoder.
+                Export <strong>project files</strong> (<code>.dat</code>) you can reopen later.
               </li>
             </ul>
           </HelpSection>
