@@ -122,8 +122,9 @@ print(logo.sample(2.5).x);            // read back x at t=2.5`}
                 <strong>Open</strong> — loads a previously saved <code>.dat</code> project.
               </li>
               <li>
-                <strong>Render</strong> — exports every frame (60 fps) of the track plus audio into{' '}
-                <code>sbJS_Video_&lt;timestamp&gt;.dat</code> for an external encoder.
+                <strong>Render</strong> — opens the export dialog to export the track plus audio as a
+                video (<code>.mp4</code> / <code>.webm</code>) at your chosen framerate and
+                resolution (defaults to 60 fps at 720p).
               </li>
             </ul>
           </HelpSection>
