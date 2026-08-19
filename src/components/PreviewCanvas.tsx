@@ -63,7 +63,12 @@ export function PreviewCanvas({ sprites, assets, time }: PreviewCanvasProps) {
     const assetByName = new Map(assets.map((a) => [a.name, a]))
     const sampled = sampleScene(sprites, time)
 
-    bufferCtx.clearRect(0, 0, WIDTH, HEIGHT)
+    // Paint an opaque white background (matches the exported video).
+    bufferCtx.setTransform(1, 0, 0, 1, 0, 0)
+    bufferCtx.globalCompositeOperation = 'source-over'
+    bufferCtx.globalAlpha = 1
+    bufferCtx.fillStyle = '#ffffff'
+    bufferCtx.fillRect(0, 0, WIDTH, HEIGHT)
     for (const sprite of sampled) {
       const asset = assetByName.get(sprite.name)
       if (!asset) continue
