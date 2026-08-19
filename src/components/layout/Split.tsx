@@ -43,7 +43,6 @@ export function Split({ direction, initialSize, children, gutterClassName }: Spl
   }, [])
 
   useEffect(() => {
-    if (!draggingRef.current) return
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', stopDragging)
     window.addEventListener('pointercancel', stopDragging)
