@@ -35,45 +35,52 @@ export function lerp(a: number, b: number, t: number): number {
 }
 
 /**
+ * Resolve a single sprite's properties at a given time (in seconds).
+ * Mirrors the original `Scene.draw`/`Sprite.sample` logic: events are sorted
+ * by start time and later events override earlier ones.
+ */
+export function sampleOne(def: SpriteDef, time: number): SpriteProperties {
+  const properties = { ...DEFAULT_PROPERTIES }
+  Object.assign(properties, def.initialProperties)
+
+  const sortedEvents = [...def.events].sort((a, b) => a.startTime - b.startTime)
+
+  for (const key of Object.keys(properties)) {
+    const events = sortedEvents.filter((e) => e.type === key)
+
+    for (const event of events) {
+      if (event.startTime > time) break
+
+      if (event.startTime + event.duration > time) {
+        if (event.duration === 0) {
+          properties[key as keyof SpriteProperties] = event.targetValue
+          continue
+        }
+
+        const t = (time - event.startTime) / event.duration
+        const eased = ease(t, event.easing)
+        properties[key as keyof SpriteProperties] = lerp(
+          properties[key as keyof SpriteProperties],
+          event.targetValue,
+          eased,
+        )
+        continue
+      }
+
+      properties[key as keyof SpriteProperties] = event.targetValue
+    }
+  }
+
+  return properties
+}
+
+/**
  * Resolve every sprite's properties at a given time (in seconds).
  * Mirrors the original `Scene.draw`/`Sprite.sample` logic: events are sorted
  * by start time and later events override earlier ones.
  */
 export function sampleSprites(sprites: SpriteDef[], time: number): SpriteProperties[] {
-  return sprites.map((sprite) => {
-    const properties = { ...DEFAULT_PROPERTIES }
-    Object.assign(properties, sprite.initialProperties)
-
-    const sortedEvents = [...sprite.events].sort((a, b) => a.startTime - b.startTime)
-
-    for (const key of Object.keys(properties)) {
-      const events = sortedEvents.filter((e) => e.type === key)
-
-      for (const event of events) {
-        if (event.startTime > time) break
-
-        if (event.startTime + event.duration > time) {
-          if (event.duration === 0) {
-            properties[key as keyof SpriteProperties] = event.targetValue
-            continue
-          }
-
-          const t = (time - event.startTime) / event.duration
-          const eased = ease(t, event.easing)
-          properties[key as keyof SpriteProperties] = lerp(
-            properties[key as keyof SpriteProperties],
-            event.targetValue,
-            eased,
-          )
-          continue
-        }
-
-        properties[key as keyof SpriteProperties] = event.targetValue
-      }
-    }
-
-    return properties
-  })
+  return sprites.map((sprite) => sampleOne(sprite, time))
 }
 
 /** Build full sampled sprite records (name + properties) for the renderer. */
