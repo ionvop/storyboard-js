@@ -4,16 +4,31 @@ import { WIDTH, HEIGHT, renderFrameToCanvas } from './video'
 
 export type VideoFormat = 'mp4' | 'webm'
 
+/** Supported output framerates. */
+export type ExportFramerate = 60 | 30 | 15
+
 export interface ExportOptions {
   sprites: SpriteDef[]
   assets: SpriteAsset[]
   /** Data URL of the uploaded music, or null for silent video. */
   audioDataUrl: string | null
+  /** Output framerate in frames per second. */
+  framerate?: ExportFramerate
+  /** Output width in pixels (defaults to {@link WIDTH}). */
+  width?: number
+  /** Output height in pixels (defaults to {@link HEIGHT}). */
+  height?: number
   onProgress?: (message: string) => void
 }
 
-const FPS = 60
-const FRAME_DURATION_US = 1_000_000 / FPS
+/** Resolution presets exposed to the UI. */
+export const RESOLUTIONS = {
+  '720p': { width: 1280, height: 720, label: '720p (1280×720)' },
+  '360p': { width: 640, height: 360, label: '360p (640×360)' },
+  '144p': { width: 256, height: 144, label: '144p (256×144)' },
+} as const
+
+export type ResolutionPreset = keyof typeof RESOLUTIONS
 
 /** Feature detection for the WebCodecs API. */
 export function supportsWebCodecs(): boolean {
@@ -66,13 +81,18 @@ async function decodeAudio(dataUrl: string | null): Promise<AudioBuffer | null> 
 export async function exportVideoWebCodecs(options: ExportOptions): Promise<void> {
   const { sprites, assets, audioDataUrl, onProgress } = options
 
+  const fps = options.framerate ?? 60
+  const width = options.width ?? WIDTH
+  const height = options.height ?? HEIGHT
+  const frameDurationUs = 1_000_000 / fps
+
   const audio = await decodeAudio(audioDataUrl)
   const duration = audio ? audio.duration : 0
-  const frameCount = Math.max(1, Math.ceil(duration * FPS))
+  const frameCount = Math.max(1, Math.ceil(duration * fps))
 
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
-    video: { codec: 'avc', width: WIDTH, height: HEIGHT, frameRate: FPS },
+    video: { codec: 'avc', width, height, frameRate: fps },
     audio: audio
       ? { codec: 'aac', numberOfChannels: audio.numberOfChannels, sampleRate: audio.sampleRate }
       : undefined,
@@ -81,8 +101,8 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
   })
 
   const canvas = document.createElement('canvas')
-  canvas.width = WIDTH
-  canvas.height = HEIGHT
+  canvas.width = width
+  canvas.height = height
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('Could not create 2D context for video export')
 
@@ -94,10 +114,10 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
   })
   videoEncoder.configure({
     codec: 'avc1.42001f',
-    width: WIDTH,
-    height: HEIGHT,
-    bitrate: 5_000_000,
-    framerate: FPS,
+    width,
+    height,
+    bitrate: width >= 1280 ? 5_000_000 : 2_500_000,
+    framerate: fps,
   })
 
   let audioEncoder: AudioEncoder | null = null
@@ -118,13 +138,13 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
 
   // Encode video frames.
   for (let i = 0; i < frameCount; i++) {
-    const time = i / FPS
-    renderFrameToCanvas(ctx, canvas, sprites, assets, time)
+    const time = i / fps
+    renderFrameToCanvas(ctx, canvas, sprites, assets, time, width, height)
     const frame = new VideoFrame(canvas, {
-      timestamp: i * FRAME_DURATION_US,
-      duration: FRAME_DURATION_US,
+      timestamp: i * frameDurationUs,
+      duration: frameDurationUs,
     })
-    videoEncoder.encode(frame, { keyFrame: i % FPS === 0 })
+    videoEncoder.encode(frame, { keyFrame: i % fps === 0 })
     frame.close()
 
     if (i % 10 === 0) onProgress?.(`Encoding video... ${i}/${frameCount}`)
@@ -177,13 +197,17 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
 export async function exportVideoMediaRecorder(options: ExportOptions): Promise<void> {
   const { sprites, assets, audioDataUrl, onProgress } = options
 
+  const fps = options.framerate ?? 60
+  const width = options.width ?? WIDTH
+  const height = options.height ?? HEIGHT
+
   const canvas = document.createElement('canvas')
-  canvas.width = WIDTH
-  canvas.height = HEIGHT
+  canvas.width = width
+  canvas.height = height
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('Could not create 2D context for video export')
 
-  const stream = canvas.captureStream(FPS)
+  const stream = canvas.captureStream(fps)
 
   // Attach audio track if music is present.
   let audioCtx: AudioContext | null = null
@@ -217,12 +241,12 @@ export async function exportVideoMediaRecorder(options: ExportOptions): Promise<
   recorder.start()
 
   const duration = audioCtx ? audioCtx.currentTime : 0
-  const frameCount = Math.max(1, Math.ceil(duration * FPS))
+  const frameCount = Math.max(1, Math.ceil(duration * fps))
 
   for (let i = 0; i < frameCount; i++) {
-    renderFrameToCanvas(ctx, canvas, sprites, assets, i / FPS)
+    renderFrameToCanvas(ctx, canvas, sprites, assets, i / fps, width, height)
     if (i % 10 === 0) onProgress?.(`Recording... ${i}/${frameCount}`)
-    await new Promise((r) => setTimeout(r, 1000 / FPS))
+    await new Promise((r) => setTimeout(r, 1000 / fps))
   }
 
   recorder.stop()
