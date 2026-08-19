@@ -40,14 +40,14 @@ export function renderSprite(
   const w = img.width * item.size * Math.abs(item.sizeH)
   const h = img.height * item.size * Math.abs(item.sizeV)
 
-  ctx.save()
   ctx.globalAlpha = item.alpha
-  if (item.additive === 1) ctx.globalCompositeOperation = 'lighter'
+  ctx.globalCompositeOperation = item.additive === 1 ? 'lighter' : 'source-over'
   ctx.translate(cx, cy)
   ctx.rotate(item.angle)
   ctx.scale(item.sizeH < 0 ? -1 : 1, item.sizeV < 0 ? -1 : 1)
   ctx.drawImage(img, -w / 2, -h / 2, w, h)
-  ctx.restore()
+  // Reset the transform manually instead of save()/restore() per sprite.
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
 }
 
 /** Turn a resolved set of properties into a draw item for the given asset. */
