@@ -38,7 +38,7 @@ export function SpritesPanel({ assets, onUpload, onUploadMusic, onRename, onDele
         ) : (
           assets.map((asset, index) => (
             <div
-              key={`${asset.name}-${index}`}
+              key={asset.id}
               className="flex items-center border-b border-neutral"
             >
               <div className="w-12 shrink-0 p-1.5">
