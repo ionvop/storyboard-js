@@ -128,10 +128,6 @@ function App() {
         onHelp={() => setHelpOpen(true)}
         rendering={rendering}
         renderProgress={renderProgress}
-        format={format}
-        onFormatChange={setFormat}
-        mp4Supported={supportsWebCodecs()}
-        webmSupported={supportsMediaRecorder()}
       />
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
