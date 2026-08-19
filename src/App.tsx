@@ -8,8 +8,17 @@ import { PreviewCanvas } from './components/PreviewCanvas'
 import { AudioPlayer } from './components/AudioPlayer'
 import { SpritesPanel } from './components/SpritesPanel'
 import { HelpModal } from './components/HelpModal'
+import { ExportModal } from './components/ExportModal'
 import { nextSpriteName, openProject, saveProject, uploadImageFile, uploadMusicFile } from './lib/file'
-import { exportVideo, supportsMediaRecorder, supportsWebCodecs, type VideoFormat } from './lib/export'
+import {
+  RESOLUTIONS,
+  exportVideo,
+  supportsMediaRecorder,
+  supportsWebCodecs,
+  type ExportFramerate,
+  type ResolutionPreset,
+  type VideoFormat,
+} from './lib/export'
 import type { ProjectData, SpriteAsset } from './lib/types'
 
 const DEFAULT_CODE = `print("Hello, world!");`
@@ -19,9 +28,12 @@ function App() {
   const [assets, setAssets] = useState<SpriteAsset[]>([])
   const [code, setCode] = useState(DEFAULT_CODE)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
   const [rendering, setRendering] = useState(false)
   const [renderProgress, setRenderProgress] = useState<string | null>(null)
   const [format, setFormat] = useState<VideoFormat>(supportsWebCodecs() ? 'mp4' : 'webm')
+  const [framerate, setFramerate] = useState<ExportFramerate>(60)
+  const [resolution, setResolution] = useState<ResolutionPreset>('720p')
   const [time, setTime] = useState(0)
 
   const sandbox = useSandbox()
@@ -81,15 +93,20 @@ function App() {
   const handleRender = useCallback(async () => {
     if (rendering) return
 
+    setExportOpen(false)
     setRendering(true)
     setRenderProgress('Rendering...')
     await new Promise((r) => setTimeout(r, 100))
 
+    const { width, height } = RESOLUTIONS[resolution]
     try {
       await exportVideo(format, {
         sprites: sandbox.sprites,
         assets,
         audioDataUrl: music,
+        framerate,
+        width,
+        height,
         onProgress: setRenderProgress,
       })
     } catch (err) {
@@ -99,7 +116,7 @@ function App() {
       setRendering(false)
       setRenderProgress(null)
     }
-  }, [assets, format, music, rendering, sandbox.sprites])
+  }, [assets, format, framerate, music, rendering, resolution, sandbox.sprites])
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-base-100 text-base-content">
@@ -107,7 +124,7 @@ function App() {
         onNew={handleNew}
         onOpen={handleOpen}
         onSave={handleSave}
-        onRender={handleRender}
+        onOpenExport={() => setExportOpen(true)}
         onHelp={() => setHelpOpen(true)}
         rendering={rendering}
         renderProgress={renderProgress}
@@ -148,6 +165,19 @@ function App() {
 
       <audio ref={audioRef} src={music ?? undefined} hidden />
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        onRender={handleRender}
+        format={format}
+        onFormatChange={setFormat}
+        framerate={framerate}
+        onFramerateChange={setFramerate}
+        resolution={resolution}
+        onResolutionChange={setResolution}
+        mp4Supported={supportsWebCodecs()}
+        webmSupported={supportsMediaRecorder()}
+      />
     </div>
   )
 }
