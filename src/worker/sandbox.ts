@@ -1,4 +1,5 @@
 import type { SandboxRequest, SpriteDef, SpriteProperties } from '../lib/types'
+import { sampleOne } from '../lib/scene'
 
 /**
  * Sandbox Web Worker (module type, bundled by Vite).
@@ -6,6 +7,21 @@ import type { SandboxRequest, SpriteDef, SpriteProperties } from '../lib/types'
  * and `print`, then posts back the serializable sprite definitions.
  * Ported from `old/sandbox.js`.
  */
+
+/** The `Sprite` instance exposed to user scripts. */
+export interface SpriteInstance {
+  _set(type: string, startTime: number, targetValue: number, duration?: number, easing?: string): void
+  moveX(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  moveY(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  scale(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  rotate(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  fade(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  additive(startTime: number, targetValue: number): void
+  scaleX(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  scaleY(startTime: number, targetValue: number, duration?: number, easing?: string): void
+  /** Resolve this sprite's properties at a given time (in seconds). */
+  sample(time: number): SpriteProperties
+}
 
 /** Factory that produces the `Sprite` constructor exposed to user scripts. */
 function makeSpriteFactory(register: (sprite: SpriteDef) => void) {
@@ -45,8 +61,13 @@ function makeSpriteFactory(register: (sprite: SpriteDef) => void) {
       scaleY(startTime: number, targetValue: number, duration = 0, easing = 'linear') {
         this._set('sizeV', startTime, targetValue, duration, easing)
       },
-    }
-  } as unknown as { new (imageName: string, initialProperties?: Partial<SpriteProperties>): unknown }
+      sample(time: number): SpriteProperties {
+        return sampleOne(def, time)
+      },
+    } satisfies SpriteInstance
+  } as unknown as {
+    new (imageName: string, initialProperties?: Partial<SpriteProperties>): SpriteInstance
+  }
 }
 
 self.onmessage = (e: MessageEvent<SandboxRequest>) => {
