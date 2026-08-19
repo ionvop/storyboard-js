@@ -41,7 +41,7 @@ export function renderSprite(
   const h = img.height * item.size * Math.abs(item.sizeV)
 
   ctx.globalAlpha = item.alpha
-  ctx.globalCompositeOperation = item.additive === 1 ? 'lighter' : 'source-over'
+  if (item.additive === 1) ctx.globalCompositeOperation = 'lighter'
   ctx.translate(cx, cy)
   ctx.rotate(item.angle)
   ctx.scale(item.sizeH < 0 ? -1 : 1, item.sizeV < 0 ? -1 : 1)
