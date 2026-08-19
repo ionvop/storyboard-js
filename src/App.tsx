@@ -56,7 +56,8 @@ function App() {
     if (!confirm('Open project? All unsaved changes will be lost')) return
     openProject((project: ProjectData) => {
       setMusic(project.music ?? null)
-      setAssets(project.sprites ?? [])
+      // Backfill stable ids for sprites saved by older versions that lack them.
+      setAssets((project.sprites ?? []).map((s) => ({ ...s, id: s.id ?? crypto.randomUUID() })))
       setCode(project.code ?? DEFAULT_CODE)
       setTime(0)
     })
@@ -73,7 +74,10 @@ function App() {
 
   const handleUploadSprite = useCallback(() => {
     uploadImageFile((dataUrl) => {
-      setAssets((prev) => [...prev, { name: nextSpriteName(prev), data: dataUrl }])
+      setAssets((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), name: nextSpriteName(prev), data: dataUrl },
+      ])
     })
   }, [])
 
