@@ -100,11 +100,21 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
     firstTimestampBehavior: 'offset',
   })
 
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Could not create 2D context for video export')
+  const outputCanvas = document.createElement('canvas')
+  outputCanvas.width = width
+  outputCanvas.height = height
+  const outputCtx = outputCanvas.getContext('2d')
+  if (!outputCtx) throw new Error('Could not create 2D context for video export')
+
+  // Render at full 720p, then scale down each frame so sprite sizes stay
+  // consistent regardless of output resolution. Only one frame is buffered at
+  // a time, keeping memory bounded on long animations.
+  const renderCanvas = document.createElement('canvas')
+  renderCanvas.width = WIDTH
+  renderCanvas.height = HEIGHT
+  const renderCtx = renderCanvas.getContext('2d')
+  if (!renderCtx) throw new Error('Could not create 2D context for video export')
+  const needsScale = width !== WIDTH || height !== HEIGHT
 
   const videoEncoder = new VideoEncoder({
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
@@ -139,8 +149,12 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
   // Encode video frames.
   for (let i = 0; i < frameCount; i++) {
     const time = i / fps
-    renderFrameToCanvas(ctx, canvas, sprites, assets, time, width, height)
-    const frame = new VideoFrame(canvas, {
+    renderFrameToCanvas(renderCtx, renderCanvas, sprites, assets, time)
+    if (needsScale) {
+      outputCtx.clearRect(0, 0, width, height)
+      outputCtx.drawImage(renderCanvas, 0, 0, width, height)
+    }
+    const frame = new VideoFrame(needsScale ? outputCanvas : renderCanvas, {
       timestamp: i * frameDurationUs,
       duration: frameDurationUs,
     })
@@ -201,13 +215,22 @@ export async function exportVideoMediaRecorder(options: ExportOptions): Promise<
   const width = options.width ?? WIDTH
   const height = options.height ?? HEIGHT
 
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Could not create 2D context for video export')
+  const outputCanvas = document.createElement('canvas')
+  outputCanvas.width = width
+  outputCanvas.height = height
+  const outputCtx = outputCanvas.getContext('2d')
+  if (!outputCtx) throw new Error('Could not create 2D context for video export')
 
-  const stream = canvas.captureStream(fps)
+  // 720p render buffer, scaled down per frame into the streamed output canvas
+  // so sprite sizes stay consistent across resolutions.
+  const renderCanvas = document.createElement('canvas')
+  renderCanvas.width = WIDTH
+  renderCanvas.height = HEIGHT
+  const renderCtx = renderCanvas.getContext('2d')
+  if (!renderCtx) throw new Error('Could not create 2D context for video export')
+  const needsScale = width !== WIDTH || height !== HEIGHT
+
+  const stream = outputCanvas.captureStream(fps)
 
   // Attach audio track if music is present.
   let audioCtx: AudioContext | null = null
@@ -244,7 +267,11 @@ export async function exportVideoMediaRecorder(options: ExportOptions): Promise<
   const frameCount = Math.max(1, Math.ceil(duration * fps))
 
   for (let i = 0; i < frameCount; i++) {
-    renderFrameToCanvas(ctx, canvas, sprites, assets, i / fps, width, height)
+    renderFrameToCanvas(renderCtx, renderCanvas, sprites, assets, i / fps)
+    if (needsScale) {
+      outputCtx.clearRect(0, 0, width, height)
+      outputCtx.drawImage(renderCanvas, 0, 0, width, height)
+    }
     if (i % 10 === 0) onProgress?.(`Recording... ${i}/${frameCount}`)
     await new Promise((r) => setTimeout(r, 1000 / fps))
   }
