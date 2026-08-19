@@ -24,7 +24,13 @@ export function renderFrameToCanvas(
   const assetByName = new Map(assets.map((a) => [a.name, a]))
   const sampled = sampleScene(sprites, time)
 
-  ctx.clearRect(0, 0, width, height)
+  // Paint an opaque white background instead of clearing so that transparent
+  // pixels do not become black in the encoded video.
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.globalAlpha = 1
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
   for (const sprite of sampled) {
     const asset = assetByName.get(sprite.name)
     if (!asset) continue
