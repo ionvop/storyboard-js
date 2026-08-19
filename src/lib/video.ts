@@ -6,8 +6,11 @@ export const WIDTH = 1280
 export const HEIGHT = 720
 
 /**
- * Draw a single frame of the scene into the given 1280x720 canvas context.
+ * Draw a single frame of the scene into the given canvas context.
  * Used by both the live preview and the video exporters.
+ *
+ * @param width  Canvas width in pixels (defaults to {@link WIDTH}).
+ * @param height Canvas height in pixels (defaults to {@link HEIGHT}).
  */
 export function renderFrameToCanvas(
   ctx: CanvasRenderingContext2D,
@@ -15,11 +18,13 @@ export function renderFrameToCanvas(
   sprites: SpriteDef[],
   assets: SpriteAsset[],
   time: number,
+  width = WIDTH,
+  height = HEIGHT,
 ) {
   const assetByName = new Map(assets.map((a) => [a.name, a]))
   const sampled = sampleScene(sprites, time)
 
-  ctx.clearRect(0, 0, WIDTH, HEIGHT)
+  ctx.clearRect(0, 0, width, height)
   for (const sprite of sampled) {
     const asset = assetByName.get(sprite.name)
     if (!asset) continue
