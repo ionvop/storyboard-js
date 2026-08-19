@@ -11,6 +11,7 @@ export function CodeEditor({ code, onChange }: CodeEditorProps) {
   return (
     <div className="h-full w-full overflow-hidden">
       <CodeMirror
+        className="h-full w-full"
         value={code}
         height="100%"
         theme={oneDark}
