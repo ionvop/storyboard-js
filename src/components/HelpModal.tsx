@@ -90,6 +90,11 @@ export function HelpModal({ open, onClose }: HelpModalProps) {
               Easings: <code>linear</code>, <code>easeIn</code>, <code>easeOut</code>,{' '}
               <code>easeInOut</code>. A <code>duration</code> of 0 snaps instantly.
             </p>
+            <p>
+              <code>sample(time)</code> — returns the sprite's resolved properties at a given time
+              (in seconds), exactly matching what is rendered on the canvas. Useful for reading
+              back a value, e.g. <code>print(sprite.sample(2.5).x)</code>.
+            </p>
           </HelpSection>
 
           <HelpSection title="4. Example">
@@ -101,7 +106,9 @@ logo.moveX(0, 1.0, 5, "easeInOut");   // slide to right over 5s
 logo.fade(0, 0.0);
 logo.fade(0, 1.0, 2, "easeOut");      // fade in
 logo.rotate(4, 0);
-logo.rotate(4, Math.PI * 2, 4);       // spin 360°`}
+logo.rotate(4, Math.PI * 2, 4);       // spin 360°
+
+print(logo.sample(2.5).x);            // read back x at t=2.5`}
             </pre>
           </HelpSection>
 
@@ -125,6 +132,7 @@ logo.rotate(4, Math.PI * 2, 4);       // spin 360°`}
             <ul className="list-disc space-y-1 ps-5">
               <li>Keep <code>Sprite("name")</code> strings matching the sprite panel names.</li>
               <li>Later events override earlier ones for the same property.</li>
+              <li><code>sample(time)</code> returns the same values the renderer uses.</li>
               <li>Rendering long tracks can produce very large files.</li>
               <li>Everything runs client-side; there is no undo — use Save often.</li>
             </ul>
