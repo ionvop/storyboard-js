@@ -1,0 +1,102 @@
+import type { ProjectData, SpriteAsset } from './types'
+
+/** Base64-encode a UTF-8 string safely (handles non-Latin1 characters). */
+export function base64Encode(text: string): string {
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary)
+}
+
+/** Decode a base64 string that was produced by {@link base64Encode}. */
+export function base64Decode(encoded: string): string {
+  const binary = atob(encoded)
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+  return new TextDecoder().decode(bytes)
+}
+
+/** Serialize and download an object as a base64 `.dat` file. */
+function downloadData(title: string, data: unknown) {
+  const encoded = base64Encode(JSON.stringify(data))
+  const blob = new Blob([encoded], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.download = title
+  a.href = url
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export function saveProject(project: ProjectData) {
+  const stamp = new Date().toISOString()
+  downloadData(`sbJS_Project_${stamp}.dat`, project)
+}
+
+/** Open a previously saved project file via a file picker. */
+export function openProject(onLoad: (data: ProjectData) => void) {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.dat'
+
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const project = JSON.parse(base64Decode(String(reader.result))) as ProjectData
+        onLoad(project)
+      } catch {
+        // Invalid or corrupted project file.
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  input.click()
+}
+
+/* ------------------------------ file uploads ------------------------------ */
+
+export function uploadMusicFile(onLoaded: (dataUrl: string) => void) {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'audio/*'
+
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => onLoaded(String(reader.result))
+    reader.readAsDataURL(file)
+  }
+
+  input.click()
+}
+
+export function uploadImageFile(onLoaded: (dataUrl: string) => void) {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/*'
+
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => onLoaded(String(reader.result))
+    reader.readAsDataURL(file)
+  }
+
+  input.click()
+}
+
+/** Generate a unique sprite name starting at `New sprite`. */
+export function nextSpriteName(assets: SpriteAsset[]): string {
+  let name = 'New sprite'
+  let suffix = 2
+  while (assets.some((s) => s.name === name)) {
+    name = `New sprite (${suffix})`
+    suffix += 1
+  }
+  return name
+}
