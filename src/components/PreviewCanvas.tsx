@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { SpriteAsset, SpriteDef } from '../lib/types'
 import { sampleScene } from '../lib/scene'
-import { makeDrawItem, renderSprite } from '../lib/render'
+import { getImage, makeDrawItem, renderSprite } from '../lib/render'
 
 const WIDTH = 1280
 const HEIGHT = 720
@@ -24,6 +24,13 @@ export function PreviewCanvas({ sprites, assets, time }: PreviewCanvasProps) {
     bufferRef.current.width = WIDTH
     bufferRef.current.height = HEIGHT
   }
+
+  // Cache the asset lookup map and decoded images — pure functions of `assets`.
+  const assetByName = useMemo(() => new Map(assets.map((a) => [a.name, a])), [assets])
+  const imageByName = useMemo(
+    () => new Map(assets.map((a) => [a.name, getImage(a.data)])),
+    [assets],
+  )
 
   // Auto-size the visible canvas to fit the container while keeping 16:9.
   useEffect(() => {
@@ -66,7 +73,7 @@ export function PreviewCanvas({ sprites, assets, time }: PreviewCanvasProps) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(buffer, 0, 0, canvas.width, canvas.height)
-  }, [sprites, assets, time, size])
+  }, [sprites, assets, time, size, assetByName, imageByName])
 
   return (
     <div ref={containerRef} className="relative h-full w-full overflow-hidden">
