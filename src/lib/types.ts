@@ -1,5 +1,7 @@
 /** Shape of an uploaded sprite asset (data URL + name). */
 export interface SpriteAsset {
+  /** Stable unique id used as a React key so renaming doesn't remount the row. */
+  id: string
   name: string
   data: string
 }
