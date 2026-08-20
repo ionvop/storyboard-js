@@ -66,6 +66,8 @@ export type SandboxMessage = SandboxSuccess | SandboxError
 
 /** A project saved to / loaded from a `.dat` file. */
 export interface ProjectData {
+  /** Display name used as the base of the save/export filename. */
+  name: string
   music: string | null
   sprites: SpriteAsset[]
   code: string
