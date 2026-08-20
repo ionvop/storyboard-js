@@ -69,7 +69,7 @@ function App() {
   }, [])
 
   const handleSave = useCallback(() => {
-    saveProject({ name, music, sprites: assets, code })
+    void saveProject({ name, music, sprites: assets, code })
   }, [name, music, assets, code])
 
   const handleUploadMusic = useCallback(() => {
