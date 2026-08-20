@@ -36,8 +36,46 @@ function downloadData(title: string, data: unknown) {
   URL.revokeObjectURL(url)
 }
 
-export function saveProject(project: ProjectData) {
-  downloadData(`sbJS_${sanitizeFilename(project.name)}.dat`, project)
+/** Minimal typing for the File System Access API's save picker (not in older TS libs). */
+type SaveFilePickerWindow = Window & {
+  showSaveFilePicker?: (options: {
+    suggestedName?: string
+    types?: Array<{ description?: string; accept: Record<string, string[]> }>
+  }) => Promise<{
+    createWritable: () => Promise<{
+      write: (data: string) => Promise<void>
+      close: () => Promise<void>
+    }>
+  }>
+}
+
+/**
+ * Save a project, asking where to put it via the native "Save As" dialog when
+ * supported (Chrome/Edge). Falls back to a direct download otherwise.
+ */
+export async function saveProject(project: ProjectData) {
+  const filename = `sbJS_${sanitizeFilename(project.name)}.dat`
+  const encoded = base64Encode(JSON.stringify(project))
+
+  const picker = (window as SaveFilePickerWindow).showSaveFilePicker
+  if (picker) {
+    try {
+      const handle = await picker({
+        suggestedName: filename,
+        types: [{ description: 'Storyboard project', accept: { 'text/plain': ['.dat'] } }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(encoded)
+      await writable.close()
+      return
+    } catch (err) {
+      // User cancelled the dialog — don't fall back to a download.
+      if (err instanceof Error && err.name === 'AbortError') return
+      // Any other failure — fall through to the direct download below.
+    }
+  }
+
+  downloadData(filename, project)
 }
 
 /** Open a previously saved project file via a file picker. */
