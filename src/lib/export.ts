@@ -1,5 +1,6 @@
 import { Muxer, ArrayBufferTarget } from 'mp4-muxer'
 import type { SpriteAsset, SpriteDef } from './types'
+import { sanitizeFilename } from './file'
 import { WIDTH, HEIGHT, renderFrameToCanvas } from './video'
 
 export type VideoFormat = 'mp4' | 'webm'
@@ -8,6 +9,8 @@ export type VideoFormat = 'mp4' | 'webm'
 export type ExportFramerate = 60 | 30 | 15
 
 export interface ExportOptions {
+  /** Project name used as the base of the output filename. */
+  name: string
   sprites: SpriteDef[]
   assets: SpriteAsset[]
   /** Data URL of the uploaded music, or null for silent video. */
@@ -199,7 +202,7 @@ export async function exportVideoWebCodecs(options: ExportOptions): Promise<void
   muxer.finalize()
 
   const buffer = muxer.target.buffer
-  downloadBlob(new Blob([buffer], { type: 'video/mp4' }), `sbJS_Video_${stamp()}.mp4`)
+  downloadBlob(new Blob([buffer], { type: 'video/mp4' }), `sbJS_${sanitizeFilename(options.name)}_${stamp()}.mp4`)
 }
 
 /* --------------------------- MediaRecorder WebM --------------------------- */
@@ -282,7 +285,7 @@ export async function exportVideoMediaRecorder(options: ExportOptions): Promise<
   if (audioCtx) await audioCtx.close()
 
   const blob = new Blob(chunks, { type: 'video/webm' })
-  downloadBlob(blob, `sbJS_Video_${stamp()}.webm`)
+  downloadBlob(blob, `sbJS_${sanitizeFilename(options.name)}_${stamp()}.webm`)
 }
 
 /** Export the animation in the requested format, choosing the best available backend. */
