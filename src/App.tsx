@@ -10,6 +10,7 @@ import { SpritesPanel } from './components/SpritesPanel'
 import { HelpModal } from './components/HelpModal'
 import { ExportModal } from './components/ExportModal'
 import { nextSpriteName, openProject, saveProject, uploadImageFile, uploadMusicFile } from './lib/file'
+import { defaultProjectName } from './lib/file'
 import {
   RESOLUTIONS,
   exportVideo,
@@ -24,6 +25,7 @@ import type { ProjectData, SpriteAsset } from './lib/types'
 const DEFAULT_CODE = `print("Hello, world!");`
 
 function App() {
+  const [name, setName] = useState(defaultProjectName)
   const [music, setMusic] = useState<string | null>(null)
   const [assets, setAssets] = useState<SpriteAsset[]>([])
   const [code, setCode] = useState(DEFAULT_CODE)
@@ -46,6 +48,7 @@ function App() {
 
   const handleNew = useCallback(() => {
     if (!confirm('New project? All unsaved changes will be lost')) return
+    setName(defaultProjectName)
     setMusic(null)
     setAssets([])
     setCode(DEFAULT_CODE)
@@ -55,6 +58,8 @@ function App() {
   const handleOpen = useCallback(() => {
     if (!confirm('Open project? All unsaved changes will be lost')) return
     openProject((project: ProjectData) => {
+      // Backfill the name for projects saved by older versions that lack it.
+      setName(project.name ?? defaultProjectName)
       setMusic(project.music ?? null)
       // Backfill stable ids for sprites saved by older versions that lack them.
       setAssets((project.sprites ?? []).map((s) => ({ ...s, id: s.id ?? crypto.randomUUID() })))
@@ -64,8 +69,8 @@ function App() {
   }, [])
 
   const handleSave = useCallback(() => {
-    saveProject({ music, sprites: assets, code })
-  }, [music, assets, code])
+    saveProject({ name, music, sprites: assets, code })
+  }, [name, music, assets, code])
 
   const handleUploadMusic = useCallback(() => {
     if (music !== null && !confirm('Replace music?')) return
@@ -105,6 +110,7 @@ function App() {
     const { width, height } = RESOLUTIONS[resolution]
     try {
       await exportVideo(format, {
+        name,
         sprites: sandbox.sprites,
         assets,
         audioDataUrl: music,
@@ -125,6 +131,8 @@ function App() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-base-100 text-base-content">
       <TopBar
+        name={name}
+        onNameChange={setName}
         onNew={handleNew}
         onOpen={handleOpen}
         onSave={handleSave}
