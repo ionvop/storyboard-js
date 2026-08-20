@@ -1,4 +1,6 @@
 interface TopBarProps {
+  name: string
+  onNameChange: (value: string) => void
   onNew: () => void
   onOpen: () => void
   onSave: () => void
@@ -9,6 +11,8 @@ interface TopBarProps {
 }
 
 export function TopBar({
+  name,
+  onNameChange,
   onNew,
   onOpen,
   onSave,
@@ -38,6 +42,15 @@ export function TopBar({
       </button>
 
       <div className="flex-1" />
+
+      <input
+        className="input input-sm input-ghost w-48 min-w-0 text-sm"
+        value={name}
+        onChange={(e) => onNameChange(e.target.value)}
+        placeholder="Project name"
+        aria-label="Project name"
+        disabled={rendering}
+      />
 
       <span className="px-2 text-xs text-base-content/60">© 2026 ionvop</span>
     </header>
