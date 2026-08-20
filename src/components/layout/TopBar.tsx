@@ -44,7 +44,7 @@ export function TopBar({
       <div className="flex-1" />
 
       <input
-        className="input input-sm input-ghost w-48 min-w-0 text-sm"
+        className="input input-sm input-bordered w-48 min-w-0 text-sm"
         value={name}
         onChange={(e) => onNameChange(e.target.value)}
         placeholder="Project name"
