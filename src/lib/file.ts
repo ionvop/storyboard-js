@@ -1,5 +1,14 @@
 import type { ProjectData, SpriteAsset } from './types'
 
+/** Default name used for new projects and as a fallback when none is set. */
+export const defaultProjectName = 'New project'
+
+/** Strip characters that are invalid in filenames, trimming surrounding whitespace. */
+export function sanitizeFilename(name: string): string {
+  const cleaned = name.replace(/[\\/:*?"<>|]/g, '').trim()
+  return cleaned || defaultProjectName
+}
+
 /** Base64-encode a UTF-8 string safely (handles non-Latin1 characters). */
 export function base64Encode(text: string): string {
   const bytes = new TextEncoder().encode(text)
@@ -28,8 +37,7 @@ function downloadData(title: string, data: unknown) {
 }
 
 export function saveProject(project: ProjectData) {
-  const stamp = new Date().toISOString()
-  downloadData(`sbJS_Project_${stamp}.dat`, project)
+  downloadData(`sbJS_${sanitizeFilename(project.name)}.dat`, project)
 }
 
 /** Open a previously saved project file via a file picker. */
