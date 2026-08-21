@@ -126,6 +126,15 @@ print(logo.sample(2.5).x);            // read back x at t=2.5`}
                 resolution (defaults to 60 fps at 720p).
               </li>
             </ul>
+            <p>
+              <a
+                className="btn btn-outline btn-sm"
+                href="sbJS_cuayo.dat"
+                download="sbJS_cuayo.dat"
+              >
+                Download example project (.dat)
+              </a>
+            </p>
           </HelpSection>
 
           <HelpSection title="6. Tips & Limitations">
