@@ -23,7 +23,7 @@
  * ========================================================================= */
 const BPM = 175;                    // track tempo — drives the whole clock
 const BEAT = 60 / BPM;              // seconds per beat (≈ 0.3429s)
-const INTRO = 1.3;                  // intro seconds (cuayo fade-in/out window)
+const OFFSET = 1.3;                  // the start of the first beat
 
 // Beat subdivisions — self-documenting note lengths instead of raw multiples.
 const EIGHTH     = BEAT / 2;        // "half beat" — quick squash wrinkles
@@ -446,11 +446,10 @@ const SEQ_CONVEYOR = [
 
 /**
  * Background: a warm colour flare leads the intro, then a long draining rush
- * fills the rest of the track. The flare is plain magenta/white circles, not
- * cuayos.
+ * fills the rest of the track.
  */
 function background() {
-    flareBg(INTRO + BEAT * 32);
+    flareBg(OFFSET + BEAT * 32);
     bgRush(BEAT * 180);
 }
 
@@ -524,4 +523,4 @@ function midground(startTime) {
  * Master launch — build the whole picture.
  * ========================================================================= */
 background();
-midground(INTRO);
+midground(OFFSET);
