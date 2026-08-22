@@ -23,7 +23,7 @@
  * ========================================================================= */
 const BPM = 175;                    // track tempo — drives the whole clock
 const BEAT = 60 / BPM;              // seconds per beat (≈ 0.3429s)
-const INTRO = 1.3;                  // intro seconds (logo fade-in/out window)
+const INTRO = 1.3;                  // intro seconds (cuayo fade-in/out window)
 
 // Beat subdivisions — self-documenting note lengths instead of raw multiples.
 const EIGHTH     = BEAT / 2;        // "half beat" — quick squash wrinkles
@@ -32,14 +32,14 @@ const QUARTER    = BEAT * 0.25;     // 16th note — the fan grid step
 const TWO_BEAT   = BEAT * 2;
 const FOUR_BEAT  = BEAT * 4;
 
-// Sprite palette used by the "emotion fan" bursts.
-const EMOTIONS = ["normal", "smile", "cry"];
+// The cuayo's facial expressions, cycled through by the fan bursts.
+const EXPRESSIONS = ["normal", "smile", "cry"];
 
 // Fan loop counts (kept from the original): 14-beat spin/scatter, 16-beat drift.
-const SPIN_FAN  = 14 * 4;
-const DRIFT_FAN = 16 * 4;
+const SPIN_COUNT  = 14 * 4;
+const DRIFT_COUNT = 16 * 4;
 
-// Where each fan clears itself to make room for the next one.
+// When each fan's cuayos clear to make room for the next fan.
 const FAN_CLEAR = BEAT * 15;
 
 
@@ -79,7 +79,7 @@ function squish(sprite, t, strength = 1, imbalance = 0.1) {
 }
 
 /**
- * A line of sprites marching along a bottom conveyor, one beat-staggered.
+ * A line of cuayos marching along a bottom conveyor, one beat-staggered.
  */
 function conveyor(t, n) {
     for (let i = 0; i < n; i++) {
@@ -94,8 +94,9 @@ function conveyor(t, n) {
 }
 
 /**
- * Feeder-driven "echo burst": an invisible spinning logo whose current angle is
- * sampled to emit `count` emotion sprites on the 16th-note grid.
+ * Feeder-driven "echo burst": an invisible spinning cuayo whose current angle
+ * is sampled to emit `count` individual cuayos on the 16th-note grid — each
+ * one gets its own expression from the `EXPRESSIONS` cycle.
  *   startAngle / targetAngle — spin the feeder (omit to skip the feeder);
  *   scatter                  – drop each spawn at a random scattered position;
  *   driftY                   – drift the fan upward instead of fading it;
@@ -103,7 +104,7 @@ function conveyor(t, n) {
  * Returns the time the emission loop ended (start + count * QUARTER).
  */
 function echoBurst(startTime, { startAngle = null, targetAngle = null, scatter = false, driftY = false, mirrorFirst = true } = {}) {
-    const count = driftY ? DRIFT_FAN : SPIN_FAN;
+    const count = driftY ? DRIFT_COUNT : SPIN_COUNT;
     let t = startTime;
 
     const feeder = startAngle !== null
@@ -119,7 +120,7 @@ function echoBurst(startTime, { startAngle = null, targetAngle = null, scatter =
         if (feeder) props.angle = feeder.sample(t).angle;
         if (scatter) { props.x = 0.35 + rng() * 0.3; props.y = 0.35 + rng() * 0.3; }
 
-        const spark = new Sprite(EMOTIONS[i % 3], props);
+        const spark = new Sprite(EXPRESSIONS[i % 3], props);
         spark.scale(t, 0.5, 0.1, "o");                 // pop in
         spark.scale(t + 0.1, 2, BEAT * 4 - 0.1, "i"); // swell out
         if (driftY) spark.moveY(startTime + BEAT * 14, 3, TWO_BEAT, "i");
@@ -135,50 +136,50 @@ function echoBurst(startTime, { startAngle = null, targetAngle = null, scatter =
  * ========================================================================= */
 
 /**
- * Logo entrance: the big face fades in, sways side-to-side with a squeezed
+ * Sway arrival: a single cuayo fades in, sways side-to-side with a squeezed
  * bounce, then pops out to make room for the next shot.
  */
-function sceneLogoDance(startTime) {
+function sceneCuayoSway(startTime) {
     let t = startTime;
-    const logo = new Sprite("normal", { size: 0.5, alpha: 0 });
+    const cuayo = new Sprite("normal", { size: 0.5, alpha: 0 });
 
-    logo.fade(t, 1);
-    logo.scale(t, 0.6, TWO_BEAT, "o");
-    logo.rotate(t, -0.1, TWO_BEAT, "o");  // lean left
-    squish(logo, t);
+    cuayo.fade(t, 1);
+    cuayo.scale(t, 0.6, TWO_BEAT, "o");
+    cuayo.rotate(t, -0.1, TWO_BEAT, "o");  // lean left
+    squish(cuayo, t);
     t += TWO_BEAT;
 
-    logo.scale(t, 0.7, TWO_BEAT, "o");
-    logo.rotate(t, 0.1, TWO_BEAT, "o");  // lean right
-    squish(logo, t);
+    cuayo.scale(t, 0.7, TWO_BEAT, "o");
+    cuayo.rotate(t, 0.1, TWO_BEAT, "o");  // lean right
+    squish(cuayo, t);
     t += TWO_BEAT;
 
-    logo.scale(t, 0, FOUR_BEAT, "i");
-    logo.rotate(t, 0, FOUR_BEAT, "i");
+    cuayo.scale(t, 0, FOUR_BEAT, "i");
+    cuayo.rotate(t, 0, FOUR_BEAT, "i");
 }
 
 /**
- * Two crying faces shuffle in from either edge, then a third sprouts at centre
- * to close the gap and reach toward the camera.
+ * Two crying cuayos shuffle in from either edge — separate individuals — then
+ * a third sprouts at centre to close the gap and reach toward the camera.
  */
 function sceneEnterFromSides(startTime) {
     let t = startTime;
 
-    // Left entry.
+    // Left cuayo.
     let body = new Sprite("cry", { x: 0.1, y: 0.3, size: 0 });
     body.scale(t, 0.3, BEAT, "o");
     body.moveX(t, 0.2, TWO_BEAT, "o");
     body.scale(t + BEAT, 0, FOUR_BEAT, "i");
     t += BEAT * 1.5;
 
-    // Right entry (mirrored so it faces inward).
+    // Right cuayo (mirrored so it faces inward).
     body = new Sprite("cry", { x: 0.9, y: 0.3, size: 0, sizeH: -1 });
     body.scale(t, 0.3, BEAT, "o");
     body.moveX(t, 0.8, TWO_BEAT, "o");
     body.scale(t + BEAT, 0, FOUR_BEAT, "i");
     t += BEAT * 1.5;
 
-    // Centre sprout: pops up, leans toward the camera, then fades.
+    // Centre cuayo: pops up, leans toward the camera, then fades.
     body = new Sprite("cry", { x: 0.4, y: 0.7, size: 0 });
     body.scale(t, 0.5, BEAT, "o");
     body.moveX(t, 0.5, BEAT, "o");
@@ -186,7 +187,7 @@ function sceneEnterFromSides(startTime) {
     body.fade(t + BEAT, 0);
 }
 
-/** A crying face is squashed into a smile in two quick motions. */
+/** A single crying cuayo is squashed into a smiling one in two quick motions. */
 function sceneSadToSmile(startTime) {
     let t = startTime;
 
@@ -202,7 +203,7 @@ function sceneSadToSmile(startTime) {
     joy.fade(t + TWO_BEAT, 0);
 }
 
-/** A row of four faces drop in one after another, then a smile crowns them. */
+/** Four neutral cuayos drop in one after another, then a smiling one crowns them. */
 function sceneDropRow(startTime) {
     let t = startTime;
 
@@ -221,7 +222,7 @@ function sceneDropRow(startTime) {
 
 /* -- Echo-burst variants ----------------------------------------------------- */
 
-/** Spin fan (left-to-right), closing on a feathering smiling stamp. */
+/** Spin fan (left-to-right), closing on a feathering smiling cuayo. */
 function sceneEchoSpin(startTime) {
     const end = echoBurst(startTime, { startAngle: -0.5, targetAngle: 0.5 });
 
@@ -231,7 +232,7 @@ function sceneEchoSpin(startTime) {
     stamp.scale(end + BEAT, 0, BEAT, "i");         // back out
 }
 
-/** Spin fan reversed (right-to-left), stamp facing away. */
+/** Spin fan reversed (right-to-left), closing on a smiling cuayo facing away. */
 function sceneEchoSpinBack(startTime) {
     const end = echoBurst(startTime, { startAngle: 0.5, targetAngle: -0.5, mirrorFirst: false });
 
@@ -241,7 +242,7 @@ function sceneEchoSpinBack(startTime) {
     stamp.scale(end + BEAT * 2.25, 0, EIGHTH, "o");
 }
 
-/** Fan scattered across the stage, then a big crying face slams it shut. */
+/** Fan scattered across the stage, then a big crying cuayo slams it shut. */
 function sceneEchoScatter(startTime) {
     const end = echoBurst(startTime, { startAngle: -0.5, targetAngle: 0.5, scatter: true });
 
@@ -260,20 +261,20 @@ function sceneEchoDrift(startTime) {
  * 5. Conveyor & crowd scenes
  * ========================================================================= */
 
-/** A conveyor line builds into a tumbling, spinning crying face. */
+/** A conveyor line builds into a tumbling, spinning crying cuayo. */
 function sceneConveyorDance(startTime) {
     let t = startTime;
     conveyor(t, 5);
     t += BEAT * 10;
 
-    // One satisfied little guy hops across, then bows out.
+    // One satisfied little cuayo hops across, then bows out.
     let body = new Sprite("normal", { y: -0.6, size: 0.5 });
     body.moveY(t, 0.5, BEAT, "o");
     squish(body, t, 0.25, -0.5);
     body.fade(t + TWO_BEAT, 0);
     t += TWO_BEAT;
 
-    // A crying face pops in, swells, does a full back-flip, then exits.
+    // A crying cuayo pops in, swells, does a full back-flip, then exits.
     body = new Sprite("cry", { size: 0.5, alpha: 0 });
     body.fade(t, 1);
     body.rotate(t, -0.1, BEAT, "o");
@@ -289,7 +290,7 @@ function sceneConveyorDance(startTime) {
     body.moveX(t + BEAT * 3, -0.5, BEAT, "o");
 }
 
-/** Conveyor feed, then a drop-row chorus topped by a huge cheering face. */
+/** Conveyor feed, then a drop-row chorus topped by a huge cheering cuayo. */
 function sceneConveyorRow(startTime) {
     let t = startTime;
     conveyor(t, 6);
@@ -305,13 +306,14 @@ function sceneConveyorRow(startTime) {
 }
 
 /**
- * A crowd "wave": six staggered bouncers, then a thick band of sprites rushing
- * left along guide curves, climaxing in one expanding character echo.
+ * A crowd "wave": six staggered cuayos bouncing on a beat grid, then a thick
+ * band of cuayos rushing left along guide curves, climaxing in one expanding
+ * smiling cuayo.
  */
 function sceneCrowdWave(startTime) {
     const t0 = startTime;
 
-    // 1. Six staggered bouncers marching on a beat grid.
+    // 1. Six staggered cuayos bouncing on a beat grid.
     let t = startTime;
     for (let i = 0; i < 6; i++) {
         const w = new Sprite("normal", { y: -0.5, size: 0.5 });
@@ -339,7 +341,7 @@ function sceneCrowdWave(startTime) {
     t += BEAT * 8;
     guide2.moveY(t, 0.1, BEAT * 8, "io");
 
-    // 2c. The rushing band — many small sprites follow the guides + jitter.
+    // 2c. The rushing band — many small cuayos following the guides + jitter.
     t = t0;
     for (let i = 0; i < 12 * 4; i++) {
         const s = guide.sample(t);
@@ -352,7 +354,7 @@ function sceneCrowdWave(startTime) {
         t += QUARTER;
     }
 
-    // 3. A lead character leaps across the band, then the smile closes it out.
+    // 3. A lead cuayo leaps across the band, then the smile closes it out.
     const lead = new Sprite("normal", { y: -0.5, size: 0.5 });
     squish(lead, t - BEAT, 1, -0.5);
     lead.moveY(t - BEAT, 0, BEAT, "o");
@@ -397,31 +399,31 @@ function schedule(cues, startTime) {
     return startTime + BEAT * total;
 }
 
-// First movement — 4 beats per scene (logo, enter, logo, sad→smile).
-const SEQ_DANCE = [
-    [sceneLogoDance, 4],
+// First movement — 4 beats per scene (sway, enter, sway, sad→smile).
+const SEQ_SWAY = [
+    [sceneCuayoSway, 4],
     [sceneEnterFromSides, 4],
-    [sceneLogoDance, 4],
+    [sceneCuayoSway, 4],
     [sceneSadToSmile, 4],
 ];
 
 // Second movement — same opening, but ends on the gathering row.
 const SEQ_DROP = [
-    [sceneLogoDance, 4],
+    [sceneCuayoSway, 4],
     [sceneEnterFromSides, 4],
-    [sceneLogoDance, 4],
+    [sceneCuayoSway, 4],
     [sceneDropRow, 4],
 ];
 
-// Third movement — triple logo bounce, then the row.
-const SEQ_TRIPLE = [
-    [sceneLogoDance, 4],
-    [sceneLogoDance, 4],
-    [sceneLogoDance, 4],
+// Third movement — triple sway bounce, then the row.
+const SEQ_TRIPLE_SWAY = [
+    [sceneCuayoSway, 4],
+    [sceneCuayoSway, 4],
+    [sceneCuayoSway, 4],
     [sceneDropRow, 4],
 ];
 
-// Echo-burst movement (16 beats per fan).
+// Echo-burst movement (16 beats per fan of cuayos).
 const SEQ_ECHO = [
     [sceneEchoSpin, 16],
     [sceneEchoSpinBack, 16],
@@ -444,21 +446,22 @@ const SEQ_CONVEYOR = [
 
 /**
  * Background: a warm colour flare leads the intro, then a long draining rush
- * fills the rest of the track.
+ * fills the rest of the track. The flare is plain magenta/white circles, not
+ * cuayos.
  */
 function background() {
     flareBg(INTRO + BEAT * 32);
     bgRush(BEAT * 180);
 }
 
-/** A warm strip of magenta/white bursts leading into the intro. */
+/** A warm strip of magenta/white circle bursts leading into the intro. */
 function flareBg(startTime) {
     let t = startTime;
     for (let i = 0; i < 32; i++) {
-        const magenta = new Sprite("magenta", { size: 0 });
-        magenta.scale(t, 2, TWO_BEAT, "o");
-        const white = new Sprite("white", { size: 0 });
-        white.scale(t + BEAT * 0.25, 2, TWO_BEAT, "o");
+        const magentaCircle = new Sprite("magenta", { size: 0 });
+        magentaCircle.scale(t, 2, TWO_BEAT, "o");
+        const whiteCircle = new Sprite("white", { size: 0 });
+        whiteCircle.scale(t + BEAT * 0.25, 2, TWO_BEAT, "o");
         t += BEAT;
     }
 }
@@ -484,7 +487,8 @@ function bgRush(startTime) {
     guide2.moveY(t, 0.5, FOUR_BEAT, "i");
     t = t0;
 
-    // Jittered streaks riding along the guides.
+    // Jittered streaks riding along the guides (reusing the neutral cuayo
+    // graphic as a plain streak, not a distinct cuayo).
     for (let i = 0; i < 12 * 4; i++) {
         const s = guide.sample(t);
         const s2 = guide2.sample(t);
@@ -498,19 +502,19 @@ function bgRush(startTime) {
 }
 
 /**
- * Midground (main action): a huge logo fades in/out across the intro, then the
- * timed timelines run in sequence.
+ * Midground (main action): a huge cuayo fades in/out across the intro, then
+ * the timed timelines run in sequence — each scene animating new cuayos.
  */
-function mid(startTime) {
+function midground(startTime) {
     const intro = new Sprite("normal", { size: 3, alpha: 0 });
     intro.fade(0, 1, startTime);           // fade in across the intro window
     intro.scale(0, 0.5, startTime, "i"); // and swell as it does
     intro.fade(startTime, 0);             // then clear
 
-    let t = schedule(SEQ_DANCE, startTime);   // +16 beats
+    let t = schedule(SEQ_SWAY, startTime);   // +16 beats
     t = schedule(SEQ_DROP, t);                // +16
-    t = schedule(SEQ_DANCE, t);               // +16
-    t = schedule(SEQ_TRIPLE, t);              // +16
+    t = schedule(SEQ_SWAY, t);                // +16
+    t = schedule(SEQ_TRIPLE_SWAY, t);         // +16
     t = schedule(SEQ_ECHO, t);                // +64
     t = schedule(SEQ_CONVEYOR, t);            // +64
 }
@@ -520,4 +524,4 @@ function mid(startTime) {
  * Master launch — build the whole picture.
  * ========================================================================= */
 background();
-mid(INTRO);
+midground(INTRO);
